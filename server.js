@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const dotenv = require("dotenv");
+const { notFound, errorHandler } = require("./Middleware/errors");
 
 //dotenv
 dotenv.config({ path: "./.env" });
@@ -15,6 +16,12 @@ app.use(cors({ credentials: true, origin: "*" }));
 
 //Database Connection
 require("./Database/conn");
+
+//Routers
+//Routes
+app.use("/api/user", require("./Routes/userRoutes"));
+app.use(notFound);
+app.use(errorHandler);
 
 // Setup Port
 const port = process.env.PORT || 5000;
