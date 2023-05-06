@@ -17,7 +17,6 @@ app.use(cors({ credentials: true, origin: "*" }));
 //Database Connection
 require("./Database/conn");
 
-//Routers
 //Routes
 app.use("/api/user", require("./Routes/userRoutes"));
 app.use(notFound);
