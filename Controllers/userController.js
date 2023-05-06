@@ -1,34 +1,51 @@
 const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel");
+const Joi = require("joi");
 
 exports.signup = async (req, res) => {
-  const { name, email, password, pic } = req.body;
-  if (!name || !email || !password) {
-    res.status(400).json({ error: "Please enter all required fields" });
-  }
+  const signupSchema = Joi.object({
+    name: Joi.string()
+      .ruleset.pattern(
+        new RegExp(/^[A-Za-z ]{3,20}$/),
+        "Name should have at least 3 characters and should not any number!"
+      )
+      .rule({
+        message: `Name should have at least 3 characters and should not any number!`,
+      })
+      .required(),
+    email: Joi.string()
+      .ruleset.email()
+      .rule({ message: `Email is invalid` })
+      .required(),
+    address: Joi.string().required(),
+    mobile: Joi.string().ruleset.pattern(
+      new RegExp(
+        /^[0-9]{11}$/
+      ),
+      "Mobile must be a number and equal to 11 numbers"
+    )
+    .rule({
+      message: `Mobile must be a number and equal to 11 numbers`,
+    })
+    .required(),
+    password: Joi.string()
+      .ruleset.pattern(
+        new RegExp(
+          /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/
+        ),
+        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!"
+      )
+      .rule({
+        message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
+      })
+      .required(),
+  });
 
-  const nameValidator = /^[A-Za-z ]{3,20}$/;
-  const emailValidator =
-    /^[a-zA-Z0-9.!#$%&'*+=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-  const passwordValidator =
-    /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/;
-
-  if (!nameValidator.test(name)) {
-    return res.status(400).json({
-      error:
-        "Name should have at least 3 characters and should not any number!",
-    });
+  const { error } = signupSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
-  if (!emailValidator.test(email)) {
-    return res.status(400).json({ error: "Invalid Email" });
-  }
-  if (!passwordValidator.test(password)) {
-    return res.status(400).json({
-      error:
-        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!",
-    });
-  }
-
+  const { name, email, address, mobile, password, pic } = req.body;
   try {
     const eamilExist = await User.findOne({ email });
 
@@ -38,6 +55,8 @@ exports.signup = async (req, res) => {
       const user = new User({
         name,
         email,
+        address,
+        mobile,
         password,
         pic,
       });
