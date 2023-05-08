@@ -19,6 +19,8 @@ require("./Database/conn");
 
 //Routes
 app.use("/api/user", require("./Routes/userRoutes"));
+app.use("/api/category", require("./Routes/categoryRoutes"));
+app.use("/api/product", require("./Routes/productRoutes"));
 app.use(notFound);
 app.use(errorHandler);
 
