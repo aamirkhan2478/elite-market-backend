@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel");
 const Joi = require("joi");
+const { default: mongoose } = require("mongoose");
 
 exports.signup = async (req, res) => {
   const signupSchema = Joi.object({
@@ -18,16 +19,15 @@ exports.signup = async (req, res) => {
       .rule({ message: `Email is invalid` })
       .required(),
     address: Joi.string().required(),
-    mobile: Joi.string().ruleset.pattern(
-      new RegExp(
-        /^[0-9]{11}$/
-      ),
-      "Mobile must be a number and equal to 11 numbers"
-    )
-    .rule({
-      message: `Mobile must be a number and equal to 11 numbers`,
-    })
-    .required(),
+    mobile: Joi.string()
+      .ruleset.pattern(
+        new RegExp(/^[0-9]{11}$/),
+        "Mobile must be a number and equal to 11 numbers"
+      )
+      .rule({
+        message: `Mobile must be a number and equal to 11 numbers`,
+      })
+      .required(),
     password: Joi.string()
       .ruleset.pattern(
         new RegExp(
@@ -96,4 +96,72 @@ exports.login = async (req, res) => {
 
 exports.getUser = (req, res) => {
   return res.send(req.user);
+};
+
+exports.updateUser = async (req, res) => {
+  const signupSchema = Joi.object({
+    name: Joi.string()
+      .ruleset.pattern(
+        new RegExp(/^[A-Za-z ]{3,20}$/),
+        "Name should have at least 3 characters and should not any number!"
+      )
+      .rule({
+        message: `Name should have at least 3 characters and should not any number!`,
+      })
+      .required(),
+    email: Joi.string()
+      .ruleset.email()
+      .rule({ message: `Email is invalid` })
+      .required(),
+    address: Joi.string().required(),
+    mobile: Joi.string()
+      .ruleset.pattern(
+        new RegExp(/^[0-9]{11}$/),
+        "Mobile must be a number and equal to 11 numbers"
+      )
+      .rule({
+        message: `Mobile must be a number and equal to 11 numbers`,
+      })
+      .required(),
+    password: Joi.string()
+      .ruleset.pattern(
+        new RegExp(
+          /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/
+        ),
+        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!"
+      )
+      .rule({
+        message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
+      })
+      .required(),
+  });
+
+  const { error } = signupSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+  const { name, email, address, mobile, password, pic } = req.body;
+  try {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      user.name = name;
+      user.email = email;
+      user.address = address;
+      user.mobile = mobile;
+      user.password = password;
+      user.pic = pic;
+      await user.save();
+      return res.status(200).json({ msg: "User Updated Successfully" });
+    } else {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("Server Error");
+  }
 };
