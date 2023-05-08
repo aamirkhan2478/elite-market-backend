@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel");
 const Joi = require("joi");
-
+//api/user/signup
+//For all users
 exports.signup = async (req, res) => {
   const signupSchema = Joi.object({
     name: Joi.string()
@@ -18,16 +19,15 @@ exports.signup = async (req, res) => {
       .rule({ message: `Email is invalid` })
       .required(),
     address: Joi.string().required(),
-    mobile: Joi.string().ruleset.pattern(
-      new RegExp(
-        /^[0-9]{11}$/
-      ),
-      "Mobile must be a number and equal to 11 numbers"
-    )
-    .rule({
-      message: `Mobile must be a number and equal to 11 numbers`,
-    })
-    .required(),
+    mobile: Joi.string()
+      .ruleset.pattern(
+        new RegExp(/^[0-9]{11}$/),
+        "Mobile must be a number and equal to 11 numbers"
+      )
+      .rule({
+        message: `Mobile must be a number and equal to 11 numbers`,
+      })
+      .required(),
     password: Joi.string()
       .ruleset.pattern(
         new RegExp(
@@ -72,6 +72,8 @@ exports.signup = async (req, res) => {
   }
 };
 
+//api/user/login
+//For all users
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -94,6 +96,8 @@ exports.login = async (req, res) => {
   }
 };
 
+//api/user/get-user
+//Only for logged in users
 exports.getUser = (req, res) => {
   return res.send(req.user);
 };
