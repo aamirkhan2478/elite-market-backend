@@ -174,6 +174,8 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+//api/user/delete-account
+//Only for logged in users
 exports.deleteAccount = async (req, res) => {
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
