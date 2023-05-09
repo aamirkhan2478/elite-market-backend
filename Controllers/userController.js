@@ -173,3 +173,22 @@ exports.updateUser = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const user = await User.findByIdAndDelete(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      return res.status(200).json({ msg: "User Deleted Successfully" });
+    } else {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).send("Server Error");
+  }
+};
