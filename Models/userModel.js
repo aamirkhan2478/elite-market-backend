@@ -17,12 +17,20 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    address: {
+    shippingAddress: {
       type: String,
       required: true,
     },
-    mobile: {
-      type: Number,
+    city: {
+      type: String,
+      required: true,
+    },
+    zip: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
       required: true,
     },
     pic: {
