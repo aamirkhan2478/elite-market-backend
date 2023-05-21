@@ -20,8 +20,7 @@ exports.signup = async (req, res) => {
       .ruleset.email()
       .rule({ message: `Email is invalid` })
       .required(),
-    address: Joi.string().required(),
-    mobile: Joi.string()
+    phone: Joi.string()
       .ruleset.pattern(
         new RegExp(/^[0-9]{11}$/),
         "Mobile must be a number and equal to 11 numbers"
@@ -41,13 +40,17 @@ exports.signup = async (req, res) => {
         message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
       })
       .required(),
+    shippingAddress: Joi.string().required(),
+    city: Joi.string().required(),
+    zip: Joi.string().required(),
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, address, mobile, password, pic } = req.body;
+  const { name, email, password, shippingAddress, city, zip, phone, pic } =
+    req.body;
   try {
     const eamilExist = await User.findOne({ email });
 
@@ -57,9 +60,11 @@ exports.signup = async (req, res) => {
       const user = new User({
         name,
         email,
-        address,
-        mobile,
         password,
+        shippingAddress,
+        city,
+        zip,
+        phone,
         pic,
       });
       await user.save();
@@ -121,8 +126,7 @@ exports.updateUser = async (req, res) => {
       .ruleset.email()
       .rule({ message: `Email is invalid` })
       .required(),
-    address: Joi.string().required(),
-    mobile: Joi.string()
+    phone: Joi.string()
       .ruleset.pattern(
         new RegExp(/^[0-9]{11}$/),
         "Mobile must be a number and equal to 11 numbers"
@@ -142,13 +146,17 @@ exports.updateUser = async (req, res) => {
         message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
       })
       .required(),
+    shippingAddress: Joi.string().required(),
+    city: Joi.string().required(),
+    zip: Joi.string().required(),
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, address, mobile, password, pic } = req.body;
+  const { name, email, password, shippingAddress, city, zip, phone, pic } =
+    req.body;
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
       const user = await User.findById(req.params.id);
@@ -157,9 +165,11 @@ exports.updateUser = async (req, res) => {
       }
       user.name = name;
       user.email = email;
-      user.address = address;
-      user.mobile = mobile;
       user.password = password;
+      user.shippingAddress = shippingAddress;
+      user.city = city;
+      user.zip = zip;
+      user.phone = phone;
       user.pic = pic;
       await user.save();
       return res.status(200).json({ msg: "User Updated Successfully" });

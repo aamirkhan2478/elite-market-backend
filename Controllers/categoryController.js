@@ -42,6 +42,7 @@ exports.showCategories = async (req, res) => {
     });
   }
 };
+
 //api/category/show-category/:id
 //For all users
 exports.showCategory = async (req, res) => {
@@ -82,7 +83,7 @@ exports.deleteCategory = async (req, res) => {
   }
 };
 
-//api/category/update-category
+//api/category/update-category/:id
 //Only for admin users
 exports.updateCategory = async (req, res) => {
   const categorySchema = Joi.object({
