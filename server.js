@@ -7,6 +7,9 @@ const { notFound, errorHandler } = require("./Middleware/errors");
 //dotenv
 dotenv.config({ path: "./.env" });
 
+// Set Static patch
+app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
+
 //convert json form
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
