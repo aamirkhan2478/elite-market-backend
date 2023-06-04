@@ -41,8 +41,13 @@ router.put(
   uploadOptions.array("images", 10),
   controller.imageGallery
 );
+router.put(
+  "/update-product/:id",
+  auth,
+  uploadOptions.single("image"),
+  controller.updateProduct
+);
 router.delete("/delete-product/:id", auth, controller.deleteProduct);
-router.put("/update-product/:id", auth, controller.updateProduct);
 router.get("/show-products", controller.showProducts);
 router.get("/show-product/:id", controller.showProduct);
 router.get("/count-product", auth, controller.countProduct);
