@@ -2,6 +2,7 @@ const Product = require("../Models/productModel");
 const Category = require("../Models/categoryModel");
 const Joi = require("joi");
 const mongoose = require("mongoose");
+const { response } = require("express");
 
 //api/product/add-product
 //only for admin users
@@ -81,17 +82,37 @@ exports.addProduct = async (req, res) => {
 //For all users
 exports.showProducts = async (req, res) => {
   let filter = {};
+
+  //Search products by category ID
   if (req.query.category) {
     filter = { category: req.query.category };
   }
 
+  //Search products by name
   if (req.query.search) {
     filter = { name: { $regex: req.query.search, $options: "i" } };
   }
 
+  // Pagination Logic
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const nextPage = page + 1;
+  const previousPage = page - 1;
+
   try {
-    const products = await Product.find(filter).populate("category");
-    return res.status(200).json(products);
+    const products = await Product.find(filter)
+      .populate("category")
+      .skip(skip)
+      .limit(limit)
+      .sort("price");
+    return res.status(200).json({
+      products,
+      page,
+      allData: products.length,
+      nextPage,
+      previousPage,
+    });
   } catch (error) {
     return res.status(500).json({
       error: error.message,
@@ -265,7 +286,7 @@ exports.imageGallery = async (req, res) => {
   }
 
   try {
-    const product = await Product.findByIdAndUpdate(
+    await Product.findByIdAndUpdate(
       req.params.id,
       {
         images: imagesPaths,
