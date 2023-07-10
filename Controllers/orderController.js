@@ -2,6 +2,7 @@ const Joi = require("joi");
 const Order = require("../Models/orderModel");
 const OrderItem = require("../Models/orderItemModel");
 const { default: mongoose } = require("mongoose");
+const Product = require("../Models/productModel");
 
 //api/order/add-order
 //Only for logged In users
@@ -38,6 +39,12 @@ exports.addOrder = async (req, res) => {
           product: orderItem.product,
         });
         newOrderItem = await newOrderItem.save();
+        const { countInStock } = await Product.findById(newOrderItem.product);
+        await Product.findByIdAndUpdate(
+          newOrderItem.product,
+          { countInStock: countInStock - newOrderItem.quantity },
+          { new: true }
+        );
         return newOrderItem._id;
       })
     );
