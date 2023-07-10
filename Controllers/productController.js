@@ -2,7 +2,6 @@ const Product = require("../Models/productModel");
 const Category = require("../Models/categoryModel");
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { response } = require("express");
 
 //api/product/add-product
 //only for admin users
@@ -79,39 +78,58 @@ exports.addProduct = async (req, res) => {
 //api/product/show-products
 //api/product/show-products?category=categoryID
 //api/product/show-products?search=name
+//api/product/show-products?limit=your limit in number&page=your page number
 //For all users
 exports.showProducts = async (req, res) => {
   let filter = {};
 
-  //Search products by category ID
+  // Search products by category ID
   if (req.query.category) {
-    filter = { category: req.query.category };
+    filter.category = req.query.category;
   }
 
-  //Search products by name
+  // Search products by name
   if (req.query.search) {
-    filter = { name: { $regex: req.query.search, $options: "i" } };
+    filter.name = { $regex: req.query.search, $options: "i" };
   }
 
   // Pagination Logic
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-  const nextPage = page + 1;
-  const previousPage = page - 1;
+  const startIndex = (page - 1) * limit;
 
   try {
     const products = await Product.find(filter)
       .populate("category")
-      .skip(skip)
-      .limit(limit)
-      .sort("price");
+      .sort("price")
+      .skip(startIndex)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    const endIndex = Math.min(startIndex + limit, totalProducts);
+
+    const pagination = {};
+
+    if (endIndex < totalProducts) {
+      pagination.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+
+    if (startIndex > 0) {
+      pagination.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
     return res.status(200).json({
       products,
       page,
-      allData: products.length,
-      nextPage,
-      previousPage,
+      totalProducts,
+      pagination,
     });
   } catch (error) {
     return res.status(500).json({
