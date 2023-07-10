@@ -17,8 +17,17 @@ exports.addCategory = async (req, res) => {
     });
   }
   const { name, icon, color } = req.body;
+  const file = req.file;
+  if (!file) return res.status(400).json({ error: "File not found" });
+
+  const fileName = req.file.filename;
+
+  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
+  const basePath = `${req.protocol}://${req.get(
+    "host"
+  )}/public/uploads/${fileName}`;
   try {
-    const category = new Category({ name, icon, color });
+    const category = new Category({ name, icon, color, image: basePath });
     await category.save();
     return res.status(201).json({
       message: "Category added successfully",
@@ -98,11 +107,21 @@ exports.updateCategory = async (req, res) => {
     });
   }
   const { name, icon, color } = req.body;
+  const file = req.file;
+  if (!file) return res.status(400).json({ error: "File not found" });
+
+  const fileName = req.file.filename;
+
+  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
+  const basePath = `${req.protocol}://${req.get(
+    "host"
+  )}/public/uploads/${fileName}`;
+
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
       const category = await Category.findByIdAndUpdate(
         req.params.id,
-        { name, icon, color },
+        { name, icon, color, image: basePath },
         { new: true }
       );
       return res.status(200).json(category);
