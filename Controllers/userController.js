@@ -44,6 +44,7 @@ exports.signup = async (req, res) => {
     city: Joi.string().required(),
     zip: Joi.string().required(),
     isAdmin: Joi.boolean().default(false),
+    pic: Joi.string().default('https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg')
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
