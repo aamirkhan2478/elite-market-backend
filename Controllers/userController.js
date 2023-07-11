@@ -51,18 +51,9 @@ exports.signup = async (req, res) => {
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, password, shippingAddress, city, zip, phone, isAdmin } =
+  const { name, email, password, shippingAddress, city, zip, phone, isAdmin,pic } =
     req.body;
 
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
   try {
     const eamilExist = await User.findOne({ email });
 
@@ -77,7 +68,7 @@ exports.signup = async (req, res) => {
         city,
         zip,
         phone,
-        pic: basePath,
+        pic,
         isAdmin,
       });
       await user.save();
@@ -162,25 +153,17 @@ exports.updateUser = async (req, res) => {
     shippingAddress: Joi.string().required(),
     city: Joi.string().required(),
     zip: Joi.string().required(),
-    isAdmin: Joi.boolean().required(),
+    isAdmin: Joi.boolean().default(false),
+    pic: Joi.string().default('https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg')
+
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, password, shippingAddress, city, zip, phone, isAdmin } =
+  const { name, email, password, shippingAddress, city, zip, phone, isAdmin,pic } =
     req.body;
-
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
 
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
@@ -195,7 +178,7 @@ exports.updateUser = async (req, res) => {
       user.city = city;
       user.zip = zip;
       user.phone = phone;
-      user.pic = basePath;
+      user.pic = pic;
       user.isAdmin = isAdmin;
       await user.save();
       return res.status(200).json({ msg: "User Updated Successfully" });

@@ -9,6 +9,7 @@ exports.addCategory = async (req, res) => {
     name: Joi.string().required(),
     icon: Joi.string(),
     color: Joi.string(),
+    image: Joi.string(),
   });
   const { error } = categorySchema.validate(req.body);
   if (error) {
@@ -16,18 +17,9 @@ exports.addCategory = async (req, res) => {
       error: error.details[0].message,
     });
   }
-  const { name, icon, color } = req.body;
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
+  const { name, icon, color, image } = req.body;
   try {
-    const category = new Category({ name, icon, color, image: basePath });
+    const category = new Category({ name, icon, color, image });
     await category.save();
     return res.status(201).json({
       message: "Category added successfully",
@@ -99,6 +91,7 @@ exports.updateCategory = async (req, res) => {
     name: Joi.string(),
     icon: Joi.string(),
     color: Joi.string(),
+    image: Joi.string(),
   });
   const { error } = categorySchema.validate(req.body);
   if (error) {
@@ -106,22 +99,13 @@ exports.updateCategory = async (req, res) => {
       error: error.details[0].message,
     });
   }
-  const { name, icon, color } = req.body;
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
+  const { name, icon, color, image } = req.body;
 
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
       const category = await Category.findByIdAndUpdate(
         req.params.id,
-        { name, icon, color, image: basePath },
+        { name, icon, color, image },
         { new: true }
       );
       return res.status(200).json(category);

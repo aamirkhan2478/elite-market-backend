@@ -34,17 +34,9 @@ exports.addProduct = async (req, res) => {
     colors,
     countInStock,
     isFeatured,
+    image,
   } = req.body;
 
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
   try {
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
@@ -56,7 +48,7 @@ exports.addProduct = async (req, res) => {
       name,
       price,
       description,
-      image: basePath,
+      image,
       images,
       category,
       brand,
@@ -210,16 +202,8 @@ exports.updateProduct = async (req, res) => {
     colors,
     countInStock,
     isFeatured,
+    image,
   } = req.body;
-  const file = req.file;
-  if (!file) return res.status(400).json({ error: "File not found" });
-
-  const fileName = req.file.filename;
-
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get(
-    "host"
-  )}/public/uploads/${fileName}`;
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
       const product = await Product.findById(req.params.id);
@@ -237,6 +221,7 @@ exports.updateProduct = async (req, res) => {
       product.colors = colors;
       product.countInStock = countInStock;
       product.isFeatured = isFeatured;
+      product.image = image;
       await product.save();
       return res.status(200).json({
         message: "Product updated successfully",
@@ -291,15 +276,13 @@ exports.imageGallery = async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
     return res.status(400).send("Invalid Product Id");
   }
-  const files = req.files;
+
+  const { images } = req.body;
   let imagesPaths = [];
 
-  // https://domainname.com/public/uploads/filename-dfse3453ds.jpeg
-  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
-
-  if (files) {
-    files.map((file) => {
-      imagesPaths.push(`${basePath}${file.filename}`);
+  if (images) {
+    images.map((file) => {
+      imagesPaths.push(file);
     });
   }
 
