@@ -86,7 +86,7 @@ exports.signup = async (req, res) => {
       const token = await user.generateToken();
       return res
         .status(200)
-        .json({ success: true, token, msg: "User Registered Successfully" });
+        .json({ success: true, token, message: "User Registered Successfully" });
     }
   } catch (err) {
     console.log(err.message);
@@ -186,7 +186,7 @@ exports.updateUser = async (req, res) => {
         },
         { new: true }
       );
-      return res.status(200).json({ msg: "User Updated Successfully" });
+      return res.status(200).json({ message: "User Updated Successfully" });
     } else {
       return res.status(404).json({
         error: "User not found",
@@ -207,7 +207,7 @@ exports.deleteAccount = async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      return res.status(200).json({ msg: "User Deleted Successfully" });
+      return res.status(200).json({ message: "User Deleted Successfully" });
     } else {
       return res.status(404).json({
         error: "User not found",
@@ -221,7 +221,16 @@ exports.deleteAccount = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   const categorySchema = Joi.object({
-    password: Joi.string(),
+    password: Joi.string()
+      .ruleset.pattern(
+        new RegExp(
+          /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/
+        ),
+        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!"
+      )
+      .rule({
+        message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
+      }),
   });
   const { error } = categorySchema.validate(req.body);
   if (error) {
