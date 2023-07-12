@@ -44,15 +44,26 @@ exports.signup = async (req, res) => {
     city: Joi.string().required(),
     zip: Joi.string().required(),
     isAdmin: Joi.boolean().default(false),
-    pic: Joi.string().default('https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg')
+    pic: Joi.string().default(
+      "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+    ),
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, password, shippingAddress, city, zip, phone, isAdmin,pic } =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    shippingAddress,
+    city,
+    zip,
+    phone,
+    isAdmin,
+    pic,
+  } = req.body;
 
   try {
     const eamilExist = await User.findOne({ email });
@@ -139,48 +150,42 @@ exports.updateUser = async (req, res) => {
         message: `Mobile must be a number and equal to 11 numbers`,
       })
       .required(),
-    password: Joi.string()
-      .ruleset.pattern(
-        new RegExp(
-          /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/
-        ),
-        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!"
-      )
-      .rule({
-        message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
-      })
-      .required(),
     shippingAddress: Joi.string().required(),
     city: Joi.string().required(),
     zip: Joi.string().required(),
     isAdmin: Joi.boolean().default(false),
-    pic: Joi.string().default('https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg')
-
+    pic: Joi.string().default(
+      "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg"
+    ),
   });
 
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const { name, email, password, shippingAddress, city, zip, phone, isAdmin,pic } =
+  const { name, email, shippingAddress, city, zip, phone, isAdmin, pic } =
     req.body;
-
+  const { id } = req.params;
   try {
-    if (mongoose.isValidObjectId(req.params.id)) {
+    if (mongoose.isValidObjectId(id)) {
       const user = await User.findById(req.params.id);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      user.name = name;
-      user.email = email;
-      user.password = password;
-      user.shippingAddress = shippingAddress;
-      user.city = city;
-      user.zip = zip;
-      user.phone = phone;
-      user.pic = pic;
-      user.isAdmin = isAdmin;
-      await user.save();
+      await User.findByIdAndUpdate(
+        id,
+        {
+          name,
+          email,
+          shippingAddress,
+          city,
+          zip,
+          phone,
+          isAdmin,
+          pic,
+        },
+        { new: true }
+      );
       return res.status(200).json({ msg: "User Updated Successfully" });
     } else {
       return res.status(404).json({
@@ -211,5 +216,40 @@ exports.deleteAccount = async (req, res) => {
   } catch (err) {
     console.log(err.message);
     res.status(500).send("Server Error");
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  const categorySchema = Joi.object({
+    password: Joi.string(),
+  });
+  const { error } = categorySchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({
+      error: error.details[0].message,
+    });
+  }
+  const { password } = req.body;
+
+  try {
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(400).json({
+          error: "User does not exist",
+        });
+      }
+      user.password = password;
+      await user.save();
+      res.status(200).json({ message: "Password changed successfully" });
+    } else {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
   }
 };
