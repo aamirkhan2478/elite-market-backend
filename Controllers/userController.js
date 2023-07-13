@@ -83,10 +83,13 @@ exports.signup = async (req, res) => {
         isAdmin,
       });
       await user.save();
+      const admin = await User.find({ email }).select("isAdmin");
       const token = await user.generateToken();
-      return res
-        .status(200)
-        .json({ success: true, token, message: "User Registered Successfully" });
+      return res.status(200).json({
+        success: true,
+        token,
+        admin: admin[0].isAdmin,
+      });
     }
   } catch (err) {
     console.log(err.message);
@@ -110,8 +113,11 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
+    const isAdmin = await User.find({ email }).select("isAdmin");
     const token = await checkEmail.generateToken();
-    return res.status(200).json({ success: true, token });
+    return res
+      .status(200)
+      .json({ success: true, token, admin: isAdmin[0].isAdmin });
   } catch (e) {
     console.error(e.message);
     return res.status(500).send("Server Error");
