@@ -7,9 +7,9 @@ const { default: mongoose } = require("mongoose");
 exports.addCategory = async (req, res) => {
   const categorySchema = Joi.object({
     name: Joi.string().required(),
-    icon: Joi.string(),
-    color: Joi.string(),
-    image: Joi.string(),
+    icon: Joi.string().default("").empty(""),
+    color: Joi.string().default("").empty(""),
+    image: Joi.string().default("").empty(""),
   });
   const { error } = categorySchema.validate(req.body);
   if (error) {

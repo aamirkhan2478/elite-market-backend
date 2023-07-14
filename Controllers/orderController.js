@@ -21,8 +21,8 @@ exports.addOrder = async (req, res) => {
         message: `Mobile must be a number and equal to 11 numbers`,
       })
       .required(),
-    totalPrice: Joi.number(),
-    user: Joi.string(),
+    totalPrice: Joi.number().required(),
+    user: Joi.string().required(),
   });
   const { error } = orderSchema.validate(req.body);
   if (error) {

@@ -6,8 +6,8 @@ exports.addCart = async (req, res) => {
   const productSchema = Joi.object({
     quantity: Joi.number().required(),
     totalPrice: Joi.number().required(),
-    size: Joi.string().default(""),
-    color: Joi.string().default(""),
+    size: Joi.string().default("").empty(""),
+    color: Joi.string().default("").empty(""),
     user: Joi.string().required(),
     product: Joi.string().required(),
   });

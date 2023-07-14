@@ -10,11 +10,12 @@ exports.addProduct = async (req, res) => {
     name: Joi.string().required(),
     price: Joi.number().required(),
     description: Joi.string().required(),
-    image: Joi.string(),
-    images: Joi.array(),
+    image: Joi.string().empty(""),
+    images: Joi.array().empty(""),
     category: Joi.string().required(),
-    brand: Joi.string(),
-    colors: Joi.array(),
+    brand: Joi.string().empty(""),
+    colors: Joi.array().default([]).empty(""),
+    sizes: Joi.array().default([]).empty(""),
     countInStock: Joi.number().required(),
     isFeatured: Joi.boolean().required(),
   });
@@ -179,11 +180,12 @@ exports.updateProduct = async (req, res) => {
     name: Joi.string().required(),
     price: Joi.number().required(),
     description: Joi.string().required(),
-    image: Joi.string(),
-    images: Joi.array(),
+    image: Joi.string().empty(""),
+    images: Joi.array().empty(""),
     category: Joi.string().required(),
-    brand: Joi.string(),
-    colors: Joi.array(),
+    brand: Joi.string().empty(""),
+    colors: Joi.array().default([]).empty(""),
+    sizes: Joi.array().default([]).empty(""),
     countInStock: Joi.number().required(),
     isFeatured: Joi.boolean().required(),
   });
@@ -200,6 +202,7 @@ exports.updateProduct = async (req, res) => {
     category,
     brand,
     colors,
+    sizes,
     countInStock,
     isFeatured,
     image,
@@ -219,6 +222,7 @@ exports.updateProduct = async (req, res) => {
       product.category = category;
       product.brand = brand;
       product.colors = colors;
+      product.sizes = sizes;
       product.countInStock = countInStock;
       product.isFeatured = isFeatured;
       product.image = image;
