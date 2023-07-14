@@ -34,10 +34,10 @@ exports.signup = async (req, res) => {
         new RegExp(
           /^(?=.*[0-9])(?=.*[a-zA-Z ])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&* ]{8,20}$/
         ),
-        "Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!"
+        "Password must contain at least 8 characters, 1 number, 1 lowercase and 1 special character!"
       )
       .rule({
-        message: `Password must contain at least 8 characters, 1 number, 1 upper, 1 lowercase and 1 special character!`,
+        message: `Password must contain at least 8 characters, 1 number, 1 lowercase and 1 special character!`,
       })
       .required(),
     shippingAddress: Joi.string().required(),
