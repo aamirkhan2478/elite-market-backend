@@ -6,6 +6,14 @@ const orderItemSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    size: {
+      type: String,
+      default: "",
+    },
+    color: {
+      type: String,
+      default: "",
+    },
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",

@@ -36,6 +36,8 @@ exports.addOrder = async (req, res) => {
       orderItems.map(async (orderItem) => {
         let newOrderItem = new OrderItem({
           quantity: orderItem.quantity,
+          size: orderItem.size,
+          color: orderItem.color,
           product: orderItem.product,
         });
         newOrderItem = await newOrderItem.save();
