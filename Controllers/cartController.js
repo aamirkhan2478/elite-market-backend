@@ -67,11 +67,40 @@ exports.deleteCart = async (req, res) => {
 //only for admin users
 exports.userCart = async (req, res) => {
   const userId = req.params.userid;
+
+  // Pagination Logic
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
+
   try {
     const cart = await Cart.find({ user: userId })
       .populate("product")
-      .populate("user", "-password");
+      .populate("user", "-password")
+      .limit(limit)
+      .sort({ updatedAt: -1 });
 
+    const totalCartData = await Cart.countDocuments();
+
+    const endIndex = Math.min(startIndex + limit, totalCartData);
+
+    const pagination = {};
+
+    if (endIndex < totalCartData) {
+      pagination.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+
+    if (startIndex > 0) {
+      pagination.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
+    //Total Amount
     let totalAmount = 0;
     cart.forEach((item) => {
       totalAmount += item.product.price * item.quantity;
@@ -80,6 +109,9 @@ exports.userCart = async (req, res) => {
     return res.status(200).json({
       cart: cart,
       totalAmount: totalAmount,
+      page,
+      totalCartData,
+      pagination,
     });
   } catch (error) {
     return res.status(500).json({

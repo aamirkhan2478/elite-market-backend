@@ -21,7 +21,7 @@ exports.addOrder = async (req, res) => {
         message: `Mobile must be a number and equal to 11 numbers`,
       })
       .required(),
-    totalPrice: Joi.number().required(),
+    totalPrice: Joi.number().empty(0),
     user: Joi.string().required(),
   });
   const { error } = orderSchema.validate(req.body);
@@ -209,14 +209,40 @@ exports.countOrder = async (req, res) => {
 //only for admin users
 exports.userOrders = async (req, res) => {
   const userId = req.params.userid;
+
+  // Pagination Logic
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
   try {
     const orders = await Order.find({ user: userId })
       .populate({
         path: "orderItems",
         populate: { path: "product", populate: "category" },
       })
-      .sort({ updatedAt: -1 });
-    return res.status(200).json(orders);
+      .sort({ updatedAt: -1 })
+      .limit(limit);
+
+    const totalOrders = await Order.countDocuments();
+
+    const endIndex = Math.min(startIndex + limit, totalOrders);
+
+    const pagination = {};
+
+    if (endIndex < totalOrders) {
+      pagination.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+
+    if (startIndex > 0) {
+      pagination.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+    return res.status(200).json({ orders, page, totalOrders, pagination });
   } catch (error) {
     return res.status(500).json({
       error: error.message,
