@@ -2,6 +2,8 @@ const { default: mongoose } = require("mongoose");
 const Cart = require("../Models/cartModel");
 const Joi = require("joi");
 
+//api/cart/add-cart
+//only for admin users
 exports.addCart = async (req, res) => {
   const productSchema = Joi.object({
     quantity: Joi.number().required(),
@@ -40,19 +42,8 @@ exports.addCart = async (req, res) => {
   }
 };
 
-exports.showCartData = async (_req, res) => {
-  try {
-    const cart = await Cart.find()
-      .populate("product")
-      .populate("user", "-password");
-    res.status(200).send(cart);
-  } catch (error) {
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-
+//api/delete/delete-cart/:id
+//only for admin users
 exports.deleteCart = async (req, res) => {
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
@@ -65,6 +56,31 @@ exports.deleteCart = async (req, res) => {
         error: "Cart Data not found",
       });
     }
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+//api/cart/user-cart/:userid
+//only for admin users
+exports.userCart = async (req, res) => {
+  const userId = req.params.userid;
+  try {
+    const cart = await Cart.find({ user: userId })
+      .populate("product")
+      .populate("user", "-password");
+
+    let totalAmount = 0;
+    cart.forEach((item) => {
+      totalAmount += item.product.price * item.quantity;
+    });
+
+    return res.status(200).json({
+      cart: cart,
+      totalAmount: totalAmount,
+    });
   } catch (error) {
     return res.status(500).json({
       error: error.message,
