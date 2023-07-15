@@ -215,15 +215,21 @@ exports.userOrders = async (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const startIndex = (page - 1) * limit;
   try {
-    const orders = await Order.find({ user: userId })
+    const orderQuery = await Order.find({ user: userId })
       .populate({
         path: "orderItems",
         populate: { path: "product", populate: "category" },
       })
+      .skip(startIndex)
       .sort({ updatedAt: -1 })
       .limit(limit);
 
-    const totalOrders = await Order.countDocuments();
+    const totalOrdersQuery = Order.countDocuments({ user: userId });
+
+    const [orders, totalOrders] = await Promise.all([
+      orderQuery,
+      totalOrdersQuery,
+    ]);
 
     const endIndex = Math.min(startIndex + limit, totalOrders);
 
@@ -242,6 +248,7 @@ exports.userOrders = async (req, res) => {
         limit: limit,
       };
     }
+
     return res.status(200).json({ orders, page, totalOrders, pagination });
   } catch (error) {
     return res.status(500).json({
