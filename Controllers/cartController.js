@@ -46,15 +46,32 @@ exports.addCart = async (req, res) => {
 //only for admin users
 exports.deleteCart = async (req, res) => {
   try {
-    if (mongoose.isValidObjectId(req.params.id)) {
-      await Cart.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+
+    if (id.includes(",")) {
+      // If multiple IDs are provided
+      const cartIds = id.split(",");
+      const validCartIds = cartIds.filter((cartId) =>
+        mongoose.isValidObjectId(cartId.trim())
+      );
+
+      await Cart.deleteMany({ _id: { $in: validCartIds } });
+
       return res.status(200).json({
         message: "Cart Data deleted successfully",
       });
     } else {
-      return res.status(404).json({
-        error: "Cart Data not found",
-      });
+      // If a single ID is provided
+      if (mongoose.isValidObjectId(id)) {
+        await Cart.findByIdAndDelete(id);
+        return res.status(200).json({
+          message: "Cart Data deleted successfully",
+        });
+      } else {
+        return res.status(404).json({
+          error: "Cart Data not found",
+        });
+      }
     }
   } catch (error) {
     return res.status(500).json({
@@ -77,10 +94,11 @@ exports.userCart = async (req, res) => {
     const cart = await Cart.find({ user: userId })
       .populate("product")
       .populate("user", "-password")
+      .skip(startIndex)
       .limit(limit)
       .sort({ updatedAt: -1 });
 
-    const totalCartData = await Cart.countDocuments();
+    const totalCartData = await Cart.countDocuments({ user: userId });
 
     const endIndex = Math.min(startIndex + limit, totalCartData);
 
