@@ -282,19 +282,12 @@ exports.imageGallery = async (req, res) => {
   }
 
   const { images } = req.body;
-  let imagesPaths = [];
-
-  if (images) {
-    images.map((file) => {
-      imagesPaths.push(file);
-    });
-  }
 
   try {
     await Product.findByIdAndUpdate(
       req.params.id,
       {
-        images: imagesPaths,
+        images,
       },
       { new: true }
     );
