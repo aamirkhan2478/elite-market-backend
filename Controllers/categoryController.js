@@ -7,8 +7,6 @@ const { default: mongoose } = require("mongoose");
 exports.addCategory = async (req, res) => {
   const categorySchema = Joi.object({
     name: Joi.string().required(),
-    icon: Joi.string().default("").empty(""),
-    color: Joi.string().default("").empty(""),
     image: Joi.string().default("").empty(""),
   });
   const { error } = categorySchema.validate(req.body);
@@ -17,9 +15,9 @@ exports.addCategory = async (req, res) => {
       error: error.details[0].message,
     });
   }
-  const { name, icon, color, image } = req.body;
+  const { name, image } = req.body;
   try {
-    const category = new Category({ name, icon, color, image });
+    const category = new Category({ name, image });
     await category.save();
     return res.status(201).json({
       message: "Category added successfully",
@@ -89,8 +87,6 @@ exports.deleteCategory = async (req, res) => {
 exports.updateCategory = async (req, res) => {
   const categorySchema = Joi.object({
     name: Joi.string(),
-    icon: Joi.string(),
-    color: Joi.string(),
     image: Joi.string(),
   });
   const { error } = categorySchema.validate(req.body);
@@ -99,13 +95,13 @@ exports.updateCategory = async (req, res) => {
       error: error.details[0].message,
     });
   }
-  const { name, icon, color, image } = req.body;
+  const { name, image } = req.body;
 
   try {
     if (mongoose.isValidObjectId(req.params.id)) {
       const category = await Category.findByIdAndUpdate(
         req.params.id,
-        { name, icon, color, image },
+        { name, image },
         { new: true }
       );
       return res.status(200).json(category);
