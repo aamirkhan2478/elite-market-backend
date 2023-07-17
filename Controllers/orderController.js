@@ -94,6 +94,10 @@ exports.showOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user", "name")
+      .populate({
+        path: "orderItems",
+        populate: "product",
+      })
       .sort({ updatedAt: -1 });
     return res.status(200).json(orders);
   } catch (error) {
