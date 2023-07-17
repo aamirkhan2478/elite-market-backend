@@ -33,6 +33,7 @@ exports.addProduct = async (req, res) => {
     category,
     brand,
     colors,
+    sizes,
     countInStock,
     isFeatured,
     image,
@@ -54,6 +55,7 @@ exports.addProduct = async (req, res) => {
       category,
       brand,
       colors,
+      sizes,
       countInStock,
       isFeatured,
     });
@@ -181,7 +183,6 @@ exports.updateProduct = async (req, res) => {
     price: Joi.number().required(),
     description: Joi.string().required(),
     image: Joi.string().empty(""),
-    images: Joi.array().empty(""),
     category: Joi.string().required(),
     brand: Joi.string().empty(""),
     colors: Joi.array().default([]).empty(""),
@@ -218,7 +219,6 @@ exports.updateProduct = async (req, res) => {
       product.name = name;
       product.price = price;
       product.description = description;
-      product.image = basePath;
       product.category = category;
       product.brand = brand;
       product.colors = colors;
