@@ -71,7 +71,6 @@ exports.addProduct = async (req, res) => {
 };
 
 //api/product/show-products
-//api/product/show-products?category=categoryID
 //api/product/show-products?search=name
 //api/product/show-products?limit=your limit in number&page=your page number
 //For all users
@@ -86,6 +85,60 @@ exports.showProducts = async (req, res) => {
   // Search products by name
   if (req.query.search) {
     filter.name = { $regex: req.query.search, $options: "i" };
+  }
+
+  // Pagination Logic
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
+
+  try {
+    const products = await Product.find(filter)
+      .populate("category")
+      .sort("price")
+      .skip(startIndex)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    const endIndex = Math.min(startIndex + limit, totalProducts);
+
+    const pagination = {};
+
+    if (endIndex < totalProducts) {
+      pagination.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+
+    if (startIndex > 0) {
+      pagination.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
+    return res.status(200).json({
+      products,
+      page,
+      totalProducts,
+      pagination,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+//api/product/show-products-by-category-id?category=categoryID
+exports.showProductByCategoryID = async (req, res) => {
+  let filter = {};
+
+  // Search products by category ID
+  if (req.query.category) {
+    filter.category = req.query.category;
   }
 
   // Pagination Logic

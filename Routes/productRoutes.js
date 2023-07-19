@@ -11,5 +11,6 @@ router.get("/show-products", controller.showProducts);
 router.get("/show-product/:id", controller.showProduct);
 router.get("/count-product", auth, controller.countProduct);
 router.get("/featured-products/:count", controller.featuredProducts);
+router.get("/show-products-by-category-id", controller.showProductByCategoryID);
 
 module.exports = router;
