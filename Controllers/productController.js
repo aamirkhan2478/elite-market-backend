@@ -77,11 +77,6 @@ exports.addProduct = async (req, res) => {
 exports.showProducts = async (req, res) => {
   let filter = {};
 
-  // Search products by category ID
-  if (req.query.category) {
-    filter.category = req.query.category;
-  }
-
   // Search products by name
   if (req.query.search) {
     filter.name = { $regex: req.query.search, $options: "i" };

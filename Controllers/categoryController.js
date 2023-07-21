@@ -42,25 +42,6 @@ exports.showCategories = async (req, res) => {
   }
 };
 
-//api/category/show-category/:id
-//For all users
-exports.showCategory = async (req, res) => {
-  try {
-    if (mongoose.isValidObjectId(req.params.id)) {
-      const category = await Category.findById(req.params.id);
-      return res.status(200).json(category);
-    } else {
-      return res.status(404).json({
-        message: "Category not found",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      error: error.message,
-    });
-  }
-};
-
 //api/category/delete-category
 //Only for admin users
 exports.deleteCategory = async (req, res) => {
